@@ -3,3 +3,4 @@ include: package:effective_dart/analysis_options.yaml
 linter:
   rules:
     constant_identifier_names: false
+    avoid_catches_without_on_clauses: false
