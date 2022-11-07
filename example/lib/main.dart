@@ -34,10 +34,7 @@ class FlutterKeycloakExample extends StatefulWidget {
 class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
   final FlutterKeycloak _flutterKeycloak = FlutterKeycloak();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final TextEditingController _confController = TextEditingController(
-    text:
-        'https://golive.dev.radicalbit.io/muxtenant/kong-api/users-service/api/subtenants/muxtenant/config',
-  );
+  final TextEditingController _confController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _scopeController = TextEditingController();
