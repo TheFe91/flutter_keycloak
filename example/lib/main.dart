@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_keycloak/flutter_keycloak.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: FlutterKeycloakExample('Flutter Keycloak Example'),
+      home: const FlutterKeycloakExample('Flutter Keycloak Example'),
     );
   }
 }
@@ -24,27 +25,25 @@ class MyApp extends StatelessWidget {
 class FlutterKeycloakExample extends StatefulWidget {
   final String title;
 
-  FlutterKeycloakExample(this.title);
+  const FlutterKeycloakExample(this.title, {Key? key}) : super(key: key);
 
   @override
   _FlutterKeycloakExampleState createState() => _FlutterKeycloakExampleState();
 }
 
 class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
-  FlutterKeycloak _flutterKeycloak = FlutterKeycloak();
-  SharedPreferences? prefs;
+  final FlutterKeycloak _flutterKeycloak = FlutterKeycloak();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final TextEditingController _confController = TextEditingController(
+    text:
+        'https://golive.dev.radicalbit.io/muxtenant/kong-api/users-service/api/subtenants/muxtenant/config',
+  );
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _scopeController = TextEditingController();
+
   String _currentPrefs = '';
   Map? _conf;
-  TextEditingController _confController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _scopeController = TextEditingController();
-
-  @override
-  initState() {
-    SharedPreferences.getInstance().then((sp) => prefs = sp);
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -55,15 +54,15 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
     super.dispose();
   }
 
-  void printStorage() {
-    setState(() {
-      _currentPrefs = '';
-      if (prefs!.getKeys().length > 0) {
-        for (var key in prefs!.getKeys()) {
-          _currentPrefs = '${_currentPrefs}\n${prefs!.getString(key)}';
-        }
-      }
-    });
+  void printStorage() async {
+    final all = await _storage.readAll();
+    _currentPrefs = '';
+    if (all.isNotEmpty) {
+      all.forEach((key, value) async {
+        _currentPrefs = '$_currentPrefs\n${await _storage.read(key: key)}';
+      });
+    }
+    setState(() {});
   }
 
   @override
@@ -77,27 +76,30 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
         child: Center(
           child: _conf != null
               ? ListView(
-                  children: <Widget>[
+                  children: [
                     Row(
                       children: [
                         Expanded(
                           child: TextFormField(
                             controller: _usernameController,
-                            decoration: InputDecoration(hintText: 'Username'),
+                            decoration:
+                                const InputDecoration(hintText: 'Username'),
                           ),
                         ),
-                        SizedBox(width: 20),
+                        const SizedBox(width: 20),
                         Expanded(
                           child: TextFormField(
                             controller: _passwordController,
-                            decoration: InputDecoration(hintText: 'Password'),
+                            decoration:
+                                const InputDecoration(hintText: 'Password'),
                           ),
                         ),
-                        SizedBox(width: 20),
+                        const SizedBox(width: 20),
                         Expanded(
                           child: TextFormField(
                             controller: _scopeController,
-                            decoration: InputDecoration(hintText: 'Scope'),
+                            decoration:
+                                const InputDecoration(hintText: 'Scope'),
                           ),
                         ),
                       ],
@@ -110,11 +112,11 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
                           _passwordController.text,
                           scope: _scopeController.text != ''
                               ? _scopeController.text
-                              : 'info',
+                              : 'offline_access',
                         );
                         printStorage();
                       },
-                      child: Text('LOGIN'),
+                      child: const Text('LOGIN'),
                     ),
                     ElevatedButton(
                       onPressed: () async {
@@ -124,30 +126,30 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
                           _currentPrefs = userInfo.toString();
                         });
                       },
-                      child: Text('GET USER INFO'),
+                      child: const Text('GET USER INFO'),
                     ),
                     ElevatedButton(
                       onPressed: () async {
                         await _flutterKeycloak.refreshLogin(
-                          scope: 'openid info offline_access',
+                          scope: 'offline_access',
                         );
                         printStorage();
                       },
-                      child: Text('REFRESH LOGIN'),
+                      child: const Text('REFRESH LOGIN'),
                     ),
                     ElevatedButton(
                       onPressed: () async {
                         await _flutterKeycloak.refreshToken();
                         printStorage();
                       },
-                      child: Text('REFRESH TOKEN'),
+                      child: const Text('REFRESH TOKEN'),
                     ),
                     ElevatedButton(
                       onPressed: () async {
                         await _flutterKeycloak.logout();
                         printStorage();
                       },
-                      child: Text('LOGOUT'),
+                      child: const Text('LOGOUT'),
                     ),
                     Text(_currentPrefs),
                   ],
@@ -156,14 +158,14 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
                   children: [
                     TextFormField(
                       controller: _confController,
-                      decoration:
-                          InputDecoration(hintText: 'Type here the config url'),
+                      decoration: const InputDecoration(
+                          hintText: 'Type here the config url'),
                     ),
                     ElevatedButton(
                       onPressed: () => _flutterKeycloak
                           .getConf(_confController.text)
                           .then((conf) => setState(() => _conf = conf)),
-                      child: Text('GET CONF AND PROCEED'),
+                      child: const Text('GET CONF AND PROCEED'),
                     ),
                   ],
                 ),
