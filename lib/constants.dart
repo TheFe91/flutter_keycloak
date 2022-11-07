@@ -1,17 +1,10 @@
-/// The KeycloakConfig Key
-const CONFIG = '@keyCloakConfig';
+class Constants {
+  /// The KeycloakConfig Key
+  static const config = '@keyCloakConfig';
 
-/// The Credentials Key
-const CREDENTIALS = '@keyCloakCredentials';
+  /// The Credentials Key
+  static const credentials = '@keyCloakCredentials';
 
-/// The Tokens Key
-const TOKENS = '@keyCloakTokens';
-
-/// GET HTTP Method
-const GET = 'GET';
-
-/// POST HTTP Method
-const POST = 'POST';
-
-/// Url
-const URL = 'url';
+  /// The Tokens Key
+  static const tokens = '@keyCloakTokens';
+}

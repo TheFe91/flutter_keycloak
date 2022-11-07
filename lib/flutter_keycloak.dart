@@ -10,7 +10,6 @@ import 'utils.dart';
 /// A Flutter plugin to manage the keycloak authentication,
 /// managing on the local storage the tokens and the credentials
 class FlutterKeycloak {
-
   /// Get KeyCloak Realm Configuration
   Future getConf(String url) async {
     final response = await Dio().get(url);
@@ -22,7 +21,8 @@ class FlutterKeycloak {
     dynamic conf,
     String username,
     String password, {
-    String scope = 'info',
+    String? scope,
+    bool storeInfo = true,
   }) async {
     final resource = conf['resource'];
     final realm = conf['realm'];
@@ -50,9 +50,11 @@ class FlutterKeycloak {
 
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
-        await saveConfiguration(conf);
-        await saveTokens(jsonResponse);
-        await saveCredentials({'username': username, 'password': password});
+        if (storeInfo) {
+          await saveConfiguration(conf);
+          await saveTokens(jsonResponse);
+          await saveCredentials({'username': username, 'password': password});
+        }
         return jsonResponse;
       }
 
@@ -62,9 +64,8 @@ class FlutterKeycloak {
         '${response.data.toString()}',
       );
     } catch (e) {
-      print(e);
+      rethrow;
     }
-    // throw Exce({...jsonResponse, status: fullResponse.status});
   }
 
   /// Init the login process
@@ -72,19 +73,31 @@ class FlutterKeycloak {
     dynamic conf,
     String username,
     String password, {
-    String scope = 'info',
+    String? scope,
+    bool storeInfo = true,
   }) async =>
-      await performLogin(conf, username, password, scope: scope);
+      await performLogin(
+        conf,
+        username,
+        password,
+        scope: scope,
+        storeInfo: storeInfo,
+      );
 
   /// Automatically redo the login
-  Future refreshLogin({String scope = 'info'}) async {
-    final conf = await getConfiguration();
+  Future refreshLogin({
+    inputConf,
+    inputCredentials,
+    scope,
+    storeInfo = true,
+  }) async {
+    final conf = inputConf ?? await getConfiguration();
     if (conf == null) {
       throw 'Error during kc-refresh-login: '
           'Could not read configuration from storage';
     }
 
-    final credentials = await getCredentials();
+    final credentials = inputCredentials ?? await getCredentials();
     if (credentials == null) {
       throw 'Error during kc-refresh-login:  Could not read from AsyncStorage';
     }
@@ -96,12 +109,12 @@ class FlutterKeycloak {
       throw 'Error during kc-refresh-login: Username or Password not found';
     }
 
-    performLogin(conf, username, password, scope: scope);
+    performLogin(conf, username, password, scope: scope, storeInfo: storeInfo);
   }
 
   /// Get User Info
-  Future retrieveUserInfo() async {
-    final conf = await getConfiguration();
+  Future retrieveUserInfo({inputConf, inputTokens}) async {
+    final conf = inputConf ?? await getConfiguration();
 
     if (conf == null) {
       throw 'Error during kc-retrieve-user-info: '
@@ -110,7 +123,7 @@ class FlutterKeycloak {
 
     final realm = conf['realm'];
     final authServerUrl = conf['auth-server-url'];
-    final savedTokens = await getTokens();
+    final savedTokens = inputTokens ?? await getTokens();
 
     if (savedTokens == null) {
       throw 'Error during kc-retrieve-user-info, savedTokens is $savedTokens';
@@ -138,8 +151,8 @@ class FlutterKeycloak {
   }
 
   /// Gets the refresh token
-  Future refreshToken() async {
-    final conf = await getConfiguration();
+  Future refreshToken({inputConf, inputTokens}) async {
+    final conf = inputConf ?? await getConfiguration();
 
     if (conf == null) {
       throw 'Could not read configuration from storage';
@@ -150,7 +163,7 @@ class FlutterKeycloak {
     final credentials = conf['credentials'];
     final authServerUrl = conf['auth-server-url'];
 
-    final savedTokens = await getTokens();
+    final savedTokens = inputTokens ?? await getTokens();
 
     if (savedTokens == null) {
       throw 'Error during kc-refresh-token, savedTokens is $savedTokens';
@@ -186,36 +199,41 @@ class FlutterKeycloak {
   }
 
   /// Logs the user out
-  Future logout() async {
-    final conf = await getConfiguration();
+  Future logout({bool destroySession = true, inputConf, inputTokens}) async {
+    if (destroySession) {
+      final conf = inputConf ?? await getConfiguration();
 
-    if (conf == null) {
-      throw 'Could not read configuration from storage';
+      if (conf == null) {
+        throw 'Could not read configuration from storage';
+      }
+
+      final realm = conf['realm'];
+      final authServerUrl = conf['auth-server-url'];
+      final savedTokens = inputTokens ?? await getTokens();
+
+      if (savedTokens == null) {
+        throw 'Error during kc-logout, savedTokens is $savedTokens';
+      }
+
+      final logoutUrl =
+          '${getRealmURL(realm, authServerUrl)}/protocol/openid-connect/logout';
+
+      final dio = Dio();
+      dio.options.headers[HttpHeaders.acceptHeader] = 'application/json';
+      dio.options.headers[HttpHeaders.contentTypeHeader] =
+          'application/x-www-form-urlencoded';
+
+      final response = await dio.get(logoutUrl);
+
+      if (response.statusCode == 200) {
+        await clearSession();
+        return;
+      }
+
+      throw 'Error during kc-logout: ${response.statusCode}: ${response.data}';
     }
 
-    final realm = conf['realm'];
-    final authServerUrl = conf['auth-server-url'];
-    final savedTokens = await getTokens();
-
-    if (savedTokens == null) {
-      throw 'Error during kc-logout, savedTokens is $savedTokens';
-    }
-
-    final logoutUrl =
-        '${getRealmURL(realm, authServerUrl)}/protocol/openid-connect/logout';
-
-    final dio = Dio();
-    dio.options.headers[HttpHeaders.acceptHeader] = 'application/json';
-    dio.options.headers[HttpHeaders.contentTypeHeader] =
-        'application/x-www-form-urlencoded';
-
-    final response = await dio.get(logoutUrl);
-
-    if (response.statusCode == 200) {
-      await clearSession();
-      return;
-    }
-
-    throw 'Error during kc-logout: ${response.statusCode}: ${response.data}';
+    await clearSession();
+    return;
   }
 }

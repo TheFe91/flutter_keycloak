@@ -1,52 +1,51 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'constants.dart';
 
 /// Save the credentials to the SharedPrefs
-Future<void> saveCredentials (Map credentials) async {
-  final sp = await SharedPreferences.getInstance();
-  await sp.setString(CREDENTIALS, json.encode(credentials));
+Future<void> saveCredentials(Map credentials) async {
+  const storage = FlutterSecureStorage();
+  await storage.write(
+      key: Constants.credentials, value: json.encode(credentials));
 }
 
 /// Save the configuration to the SharedPrefs
 Future<void> saveConfiguration(Map conf) async {
-  final sp = await SharedPreferences.getInstance();
-  await sp.setString(CONFIG, json.encode(conf));
+  const storage = FlutterSecureStorage();
+  await storage.write(key: Constants.config, value: json.encode(conf));
 }
 
 /// Save the tokens to the SharedPrefs
 Future<void> saveTokens(Map tokens) async {
-  final sp = await SharedPreferences.getInstance();
-  await sp.setString(TOKENS, json.encode(tokens));
+  const storage = FlutterSecureStorage();
+  await storage.write(key: Constants.tokens, value: json.encode(tokens));
 }
 
 /// Get the credentials from the SharedPrefs
 Future<Map?> getCredentials() async {
-  final sp = await SharedPreferences.getInstance();
-  final credentials = await sp.getString(CREDENTIALS);
+  const storage = FlutterSecureStorage();
+  final credentials = await storage.read(key: Constants.credentials);
   return credentials != null ? json.decode(credentials) : null;
 }
 
 /// Get the configuration from the SharedPrefs
 Future<Map?> getConfiguration() async {
-  final sp = await SharedPreferences.getInstance();
-  final conf = await sp.getString(CONFIG);
+  const storage = FlutterSecureStorage();
+  final conf = await storage.read(key: Constants.config);
   return conf != null ? json.decode(conf) : null;
 }
 
 /// Get the tokens from the SharedPrefs
 Future<Map?> getTokens() async {
-  final sp = await SharedPreferences.getInstance();
-  final tokens = await sp.getString(TOKENS);
+  const storage = FlutterSecureStorage();
+  final tokens = await storage.read(key: Constants.tokens);
   return tokens != null ? json.decode(tokens) : null;
 }
 
 /// Clear the plugin's SharedPrefs keys
 Future<void> clearSession() async {
-  final sp = await SharedPreferences.getInstance();
-  await sp.remove(CONFIG);
-  await sp.remove(TOKENS);
-  await sp.remove(CREDENTIALS);
+  const storage = FlutterSecureStorage();
+  storage.deleteAll();
 }
