@@ -1,5 +1,6 @@
 library flutter_keycloak;
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -58,7 +59,7 @@ class FlutterKeycloak {
         return jsonResponse;
       }
 
-      print(
+      log(
         'Error during kc-api-login, '
         '${response.statusCode}: '
         '${response.data.toString()}',

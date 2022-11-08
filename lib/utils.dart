@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'token_storage.dart';
 
@@ -22,15 +23,12 @@ Future<bool> isAccessTokenExpired() async {
   try {
     final tokens = await getTokens();
     final accessToken = tokens!['access_token'];
-    final tokenExpirationTime = int.parse(extractKeyFromJwtTokenPayload(
-        'exp', accessToken));
-    final now = DateTime
-        .now()
-        .second;
+    final tokenExpirationTime =
+        int.parse(extractKeyFromJwtTokenPayload('exp', accessToken));
+    final now = DateTime.now().second;
     return tokenExpirationTime > now;
-  }
-  catch (e) {
-    print('Error in \'isAccessTokenExpired()\' call: $e');
+  } catch (e) {
+    log('Error in \'isAccessTokenExpired()\' call: $e');
     return false;
   }
 }
@@ -40,15 +38,12 @@ Future<bool> willAccessTokenExpireInLessThan(int seconds) async {
   try {
     final tokens = await getTokens();
     final accessToken = tokens!['access_token'];
-    final tokenExpirationTime = int.parse(extractKeyFromJwtTokenPayload(
-        'exp', accessToken));
-    final now = DateTime
-        .now()
-        .second;
+    final tokenExpirationTime =
+        int.parse(extractKeyFromJwtTokenPayload('exp', accessToken));
+    final now = DateTime.now().second;
     return (tokenExpirationTime - now) < seconds;
-  }
-  catch (e) {
-    print('Error in \'isAccessTokenExpired()\' call: $e');
+  } catch (e) {
+    log('Error in \'isAccessTokenExpired()\' call: $e');
     return false;
   }
 }
