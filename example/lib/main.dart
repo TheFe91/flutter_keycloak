@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keycloak/flutter_keycloak.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_keycloak/token_storage.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -33,7 +33,6 @@ class FlutterKeycloakExample extends StatefulWidget {
 
 class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
   final FlutterKeycloak _flutterKeycloak = FlutterKeycloak();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final TextEditingController _confController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -51,15 +50,13 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
     super.dispose();
   }
 
-  void printStorage() async {
-    final all = await _storage.readAll();
-    _currentPrefs = '';
-    if (all.isNotEmpty) {
-      all.forEach((key, value) async {
-        _currentPrefs = '$_currentPrefs\n${await _storage.read(key: key)}';
+  void printStorage() {
+    getCredentials().then((credentials) {
+      setState(() {
+        _currentPrefs =
+            '${getConfiguration()}\n\n${getTokens()}\n\n$credentials';
       });
-    }
-    setState(() {});
+    });
   }
 
   @override

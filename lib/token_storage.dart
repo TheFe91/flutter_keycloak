@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'constants.dart';
 
@@ -12,15 +13,13 @@ Future<void> saveCredentials(Map credentials) async {
 }
 
 /// Save the configuration to the SharedPrefs
-Future<void> saveConfiguration(Map conf) async {
-  const storage = FlutterSecureStorage();
-  await storage.write(key: Constants.config, value: json.encode(conf));
+void saveConfiguration(Map conf) {
+  GetStorage().write(Constants.config, conf);
 }
 
 /// Save the tokens to the SharedPrefs
-Future<void> saveTokens(Map tokens) async {
-  const storage = FlutterSecureStorage();
-  await storage.write(key: Constants.tokens, value: json.encode(tokens));
+void saveTokens(Map tokens) {
+  GetStorage().write(Constants.tokens, tokens);
 }
 
 /// Get the credentials from the SharedPrefs
@@ -31,21 +30,15 @@ Future<Map?> getCredentials() async {
 }
 
 /// Get the configuration from the SharedPrefs
-Future<Map?> getConfiguration() async {
-  const storage = FlutterSecureStorage();
-  final conf = await storage.read(key: Constants.config);
-  return conf != null ? json.decode(conf) : null;
-}
+Map? getConfiguration() => GetStorage().read(Constants.config);
 
 /// Get the tokens from the SharedPrefs
-Future<Map?> getTokens() async {
-  const storage = FlutterSecureStorage();
-  final tokens = await storage.read(key: Constants.tokens);
-  return tokens != null ? json.decode(tokens) : null;
-}
+Map? getTokens() => GetStorage().read(Constants.tokens);
 
 /// Clear the plugin's SharedPrefs keys
 Future<void> clearSession() async {
   const storage = FlutterSecureStorage();
-  storage.deleteAll();
+  storage.delete(key: Constants.credentials);
+  GetStorage().remove(Constants.config);
+  GetStorage().remove(Constants.tokens);
 }

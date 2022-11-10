@@ -18,7 +18,7 @@ class FlutterKeycloak {
   }
 
   /// Real login process
-  Future performLogin(
+  Future _performLogin(
     dynamic conf,
     String username,
     String password, {
@@ -52,8 +52,8 @@ class FlutterKeycloak {
       if (response.statusCode == 200) {
         final jsonResponse = response.data;
         if (storeInfo) {
-          await saveConfiguration(conf);
-          await saveTokens(jsonResponse);
+          saveConfiguration(conf);
+          saveTokens(jsonResponse);
           await saveCredentials({'username': username, 'password': password});
         }
         return jsonResponse;
@@ -77,7 +77,7 @@ class FlutterKeycloak {
     String? scope,
     bool storeInfo = true,
   }) async =>
-      await performLogin(
+      await _performLogin(
         conf,
         username,
         password,
@@ -92,7 +92,7 @@ class FlutterKeycloak {
     scope,
     storeInfo = true,
   }) async {
-    final conf = inputConf ?? await getConfiguration();
+    final conf = inputConf ?? getConfiguration();
     if (conf == null) {
       throw 'Error during kc-refresh-login: '
           'Could not read configuration from storage';
@@ -110,12 +110,12 @@ class FlutterKeycloak {
       throw 'Error during kc-refresh-login: Username or Password not found';
     }
 
-    performLogin(conf, username, password, scope: scope, storeInfo: storeInfo);
+    _performLogin(conf, username, password, scope: scope, storeInfo: storeInfo);
   }
 
   /// Get User Info
   Future retrieveUserInfo({inputConf, inputTokens}) async {
-    final conf = inputConf ?? await getConfiguration();
+    final conf = inputConf ?? getConfiguration();
 
     if (conf == null) {
       throw 'Error during kc-retrieve-user-info: '
@@ -124,7 +124,7 @@ class FlutterKeycloak {
 
     final realm = conf['realm'];
     final authServerUrl = conf['auth-server-url'];
-    final savedTokens = inputTokens ?? await getTokens();
+    final savedTokens = inputTokens ?? getTokens();
 
     if (savedTokens == null) {
       throw 'Error during kc-retrieve-user-info, savedTokens is $savedTokens';
@@ -153,7 +153,7 @@ class FlutterKeycloak {
 
   /// Gets the refresh token
   Future refreshToken({inputConf, inputTokens}) async {
-    final conf = inputConf ?? await getConfiguration();
+    final conf = inputConf ?? getConfiguration();
 
     if (conf == null) {
       throw 'Could not read configuration from storage';
@@ -164,7 +164,7 @@ class FlutterKeycloak {
     final credentials = conf['credentials'];
     final authServerUrl = conf['auth-server-url'];
 
-    final savedTokens = inputTokens ?? await getTokens();
+    final savedTokens = inputTokens ?? getTokens();
 
     if (savedTokens == null) {
       throw 'Error during kc-refresh-token, savedTokens is $savedTokens';
@@ -190,7 +190,7 @@ class FlutterKeycloak {
     final jsonResponse = await response.data;
 
     if (response.statusCode == 200) {
-      await saveTokens(jsonResponse);
+      saveTokens(jsonResponse);
       return jsonResponse;
     }
 
@@ -202,7 +202,7 @@ class FlutterKeycloak {
   /// Logs the user out
   Future logout({bool destroySession = true, inputConf, inputTokens}) async {
     if (destroySession) {
-      final conf = inputConf ?? await getConfiguration();
+      final conf = inputConf ?? getConfiguration();
 
       if (conf == null) {
         throw 'Could not read configuration from storage';
@@ -210,7 +210,7 @@ class FlutterKeycloak {
 
       final realm = conf['realm'];
       final authServerUrl = conf['auth-server-url'];
-      final savedTokens = inputTokens ?? await getTokens();
+      final savedTokens = inputTokens ?? getTokens();
 
       if (savedTokens == null) {
         throw 'Error during kc-logout, savedTokens is $savedTokens';

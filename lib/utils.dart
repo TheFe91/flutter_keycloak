@@ -21,7 +21,7 @@ String extractKeyFromJwtTokenPayload(String key, String token) {
 /// Get if AT is expired
 Future<bool> isAccessTokenExpired() async {
   try {
-    final tokens = await getTokens();
+    final tokens = getTokens();
     final accessToken = tokens!['access_token'];
     final tokenExpirationTime =
         int.parse(extractKeyFromJwtTokenPayload('exp', accessToken));
@@ -36,7 +36,7 @@ Future<bool> isAccessTokenExpired() async {
 /// Get if AT will expire in less than specified seconds
 Future<bool> willAccessTokenExpireInLessThan(int seconds) async {
   try {
-    final tokens = await getTokens();
+    final tokens = getTokens();
     final accessToken = tokens!['access_token'];
     final tokenExpirationTime =
         int.parse(extractKeyFromJwtTokenPayload('exp', accessToken));
