@@ -10,7 +10,7 @@ String getRealmURL(String realm, String authServerUrl) {
 }
 
 /// Extract the key from the JTW Token Payload
-String extractKeyFromJwtTokenPayload(String key, String token) {
+int extractKeyFromJwtTokenPayload(String key, String token) {
   final tokenBody = token.split('.')[1];
   final stringToBase64 = utf8.fuse(base64);
   final decoded = stringToBase64.decode(tokenBody);
@@ -24,9 +24,10 @@ Future<bool> isAccessTokenExpired() async {
     final tokens = getTokens();
     final accessToken = tokens!['access_token'];
     final tokenExpirationTime =
-        int.parse(extractKeyFromJwtTokenPayload('exp', accessToken));
-    final now = DateTime.now().second;
-    return tokenExpirationTime > now;
+        extractKeyFromJwtTokenPayload('exp', accessToken);
+    final int nowMillis = DateTime.now().millisecondsSinceEpoch;
+    final int tokenExpMillis = tokenExpirationTime * 1000;
+    return tokenExpMillis > nowMillis;
   } catch (e) {
     log('Error in \'isAccessTokenExpired()\' call: $e');
     return false;
@@ -39,11 +40,12 @@ Future<bool> willAccessTokenExpireInLessThan(int seconds) async {
     final tokens = getTokens();
     final accessToken = tokens!['access_token'];
     final tokenExpirationTime =
-        int.parse(extractKeyFromJwtTokenPayload('exp', accessToken));
-    final now = DateTime.now().second;
-    return (tokenExpirationTime - now) < seconds;
+        extractKeyFromJwtTokenPayload('exp', accessToken);
+    final int nowMillis = DateTime.now().millisecondsSinceEpoch;
+    final int tokenExpMillis = tokenExpirationTime * 1000;
+    return (tokenExpMillis - nowMillis) < seconds;
   } catch (e) {
-    log('Error in \'isAccessTokenExpired()\' call: $e');
+    log('Error in \'willAccessTokenExpireInLessThan()\' call: $e');
     return false;
   }
 }

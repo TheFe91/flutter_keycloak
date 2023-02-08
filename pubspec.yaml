@@ -1,6 +1,6 @@
 name: flutter_keycloak
 description: A Flutter Keycloak wrapper, to manage the authentication and tokens automatically
-version: 1.1.0
+version: 1.1.1+1
 homepage: https://github.com/TheFe91/flutter_keycloak
 
 environment:
@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^4.0.6
-  flutter_secure_storage: ^6.0.0
+  flutter_secure_storage: ^7.0.1
   get_storage: ^2.0.3
 
 dev_dependencies:

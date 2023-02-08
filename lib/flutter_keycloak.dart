@@ -1,5 +1,3 @@
-library flutter_keycloak;
-
 import 'dart:developer';
 import 'dart:io';
 

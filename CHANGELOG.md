@@ -1,3 +1,12 @@
+## [1.1.2]
+* Updated deps
+
+## [1.1.1+1]
+* HOTFIX: Fixed a bug on 1.1.1
+
+## [1.1.1]
+* BUGFIX: Fixed a bug preventing the refresh
+
 ## [1.1.0]
 * Switched to GetStorage for the non-sensitive data
 
