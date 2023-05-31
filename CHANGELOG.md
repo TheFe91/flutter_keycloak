@@ -1,3 +1,6 @@
+## [1.1.4]
+* HOTFIX: Fix bug on 1.1.3
+
 ## [1.1.3]
 * Bump `flutter_secure_storage` version to 8.0.0
 

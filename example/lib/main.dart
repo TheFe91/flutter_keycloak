@@ -45,12 +45,9 @@ class FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
   @override
   void initState() {
     GetStorage.init();
-    _confController = TextEditingController(
-        text:
-            'https://golive.dev.radicalbit.io/muxtenant/kong-api/users-service/api/subtenants/muxtenant/config');
-    _usernameController =
-        TextEditingController(text: 'alessandro.defendenti@radicalbit.io');
-    _passwordController = TextEditingController(text: 'password');
+    _confController = TextEditingController();
+    _usernameController = TextEditingController();
+    _passwordController = TextEditingController();
     _scopeController = TextEditingController();
     super.initState();
   }
