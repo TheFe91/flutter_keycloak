@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keycloak/flutter_keycloak.dart';
 import 'package:flutter_keycloak/token_storage.dart';
+import 'package:get_storage/get_storage.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -28,18 +29,31 @@ class FlutterKeycloakExample extends StatefulWidget {
   const FlutterKeycloakExample(this.title, {Key? key}) : super(key: key);
 
   @override
-  _FlutterKeycloakExampleState createState() => _FlutterKeycloakExampleState();
+  FlutterKeycloakExampleState createState() => FlutterKeycloakExampleState();
 }
 
-class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
+class FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
   final FlutterKeycloak _flutterKeycloak = FlutterKeycloak();
-  final TextEditingController _confController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _scopeController = TextEditingController();
+  late final TextEditingController _confController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _passwordController;
+  late final TextEditingController _scopeController;
 
   String _currentPrefs = '';
   Map? _conf;
+
+  @override
+  void initState() {
+    GetStorage.init();
+    _confController = TextEditingController(
+        text:
+            'https://golive.dev.radicalbit.io/muxtenant/kong-api/users-service/api/subtenants/muxtenant/config');
+    _usernameController =
+        TextEditingController(text: 'alessandro.defendenti@radicalbit.io');
+    _passwordController = TextEditingController(text: 'password');
+    _scopeController = TextEditingController();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -141,11 +155,13 @@ class _FlutterKeycloakExampleState extends State<FlutterKeycloakExample> {
                     ElevatedButton(
                       onPressed: () async {
                         await _flutterKeycloak.logout();
-                        printStorage();
+                        setState(() {
+                          _currentPrefs = '';
+                        });
                       },
                       child: const Text('LOGOUT'),
                     ),
-                    Text(_currentPrefs),
+                    if (_currentPrefs != '') Text(_currentPrefs),
                   ],
                 )
               : Column(
