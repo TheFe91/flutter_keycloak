@@ -22,6 +22,8 @@ workflows:
         - credentials
 
     scripts:
+      - name: Check env
+        script: echo $PUB_DEV_CREDENTIALS
       - name: Publish to pub.dev
         script: |
           echo $PUB_DEV_CREDENTIALS > "$FLUTTER_ROOT/.pub-cache/credentials.json"
