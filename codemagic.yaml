@@ -1,0 +1,29 @@
+workflows:
+  default-workflow:
+    name: Build, test and deploy
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: "*"
+      cancel_previous_builds: true
+
+    environment:
+      flutter: stable
+      groups:
+        - credentials
+
+    scripts:
+      - name: Publish to pub.dev
+        script: |
+          echo $PUB_DEV_CREDENTIALS > "$FLUTTER_ROOT/.pub-cache/credentials.json"
+          flutter pub publish --dry-run
+          flutter pub publish -f
