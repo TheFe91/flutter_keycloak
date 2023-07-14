@@ -1,3 +1,6 @@
+## [1.1.5]
+* FEATURE: Token body is now forced to be a multiple of four, avoiding encoding problems
+
 ## [1.1.4]
 * HOTFIX: Fix bug on 1.1.3
 
